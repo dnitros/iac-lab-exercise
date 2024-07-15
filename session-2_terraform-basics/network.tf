@@ -86,11 +86,11 @@ resource "aws_nat_gateway" "nat-gateway" {
   }
 }
 
-resource "aws_route_table" "main-route-table" {
-  vpc_id = aws_vpc.vpc.id
+resource "aws_default_route_table" "default-route-table" {
+  default_route_table_id = aws_vpc.vpc.default_route_table_id
 
   tags = {
-    Name = format("%s-main-route-table", var.prefix)
+    Name = format("%s-default-route-table", var.prefix)
   }
 }
 
@@ -118,11 +118,6 @@ resource "aws_route_table" "private-route-table" {
   tags = {
     Name = format("%s-private-route-table", var.prefix)
   }
-}
-
-resource "aws_main_route_table_association" "main-rt-assoc" {
-  vpc_id         = aws_vpc.vpc.id
-  route_table_id = aws_route_table.main-route-table.id
 }
 
 resource "aws_route_table_association" "public-subnet-1-rt-assoc" {
