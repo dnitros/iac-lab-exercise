@@ -85,3 +85,62 @@ resource "aws_nat_gateway" "nat-gateway" {
     Name = format("%s-nat-gateway", var.prefix)
   }
 }
+
+resource "aws_route_table" "main-route-table" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = format("%s-main-route-table", var.prefix)
+  }
+}
+
+resource "aws_route_table" "public-route-table" {
+  vpc_id = aws_vpc.vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.internet-gateway.id
+  }
+
+  tags = {
+    Name = format("%s-public-route-table", var.prefix)
+  }
+}
+
+resource "aws_route_table" "private-route-table" {
+  vpc_id = aws_vpc.vpc.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat-gateway.id
+  }
+
+  tags = {
+    Name = format("%s-private-route-table", var.prefix)
+  }
+}
+
+resource "aws_main_route_table_association" "main-rt-assoc" {
+  vpc_id         = aws_vpc.vpc.id
+  route_table_id = aws_route_table.main-route-table.id
+}
+
+resource "aws_route_table_association" "public-subnet-1-rt-assoc" {
+  subnet_id      = aws_subnet.public-subnet-1.id
+  route_table_id = aws_route_table.public-route-table.id
+}
+
+resource "aws_route_table_association" "public-subnet-2-rt-assoc" {
+  subnet_id      = aws_subnet.public-subnet-2.id
+  route_table_id = aws_route_table.public-route-table.id
+}
+
+resource "aws_route_table_association" "private-subnet-1-rt-assoc" {
+  subnet_id      = aws_subnet.private-subnet-1.id
+  route_table_id = aws_route_table.private-route-table.id
+}
+
+resource "aws_route_table_association" "private-subnet-2-rt-assoc" {
+  subnet_id      = aws_subnet.private-subnet-2.id
+  route_table_id = aws_route_table.private-route-table.id
+}
