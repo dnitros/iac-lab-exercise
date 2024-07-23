@@ -139,3 +139,18 @@ resource "aws_route_table_association" "private-subnet-2-rt-assoc" {
   subnet_id      = aws_subnet.private-subnet-2.id
   route_table_id = aws_route_table.private-route-table.id
 }
+
+import {
+  to = aws_subnet.manual-subnet
+  id = "subnet-0aa6c6c19d7d58eb1"
+}
+
+resource "aws_subnet" "manual-subnet" {
+  vpc_id            = aws_vpc.vpc.id
+  availability_zone = format("%sa", var.region)
+  cidr_block        = "192.168.1.96/28"
+  tags = {
+    Name      = format("%s-manual-subnet", var.prefix)
+    Operation = "manual"
+  }
+}
