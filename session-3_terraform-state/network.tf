@@ -155,17 +155,20 @@ resource "aws_route_table_association" "private-subnet-2-rt-assoc" {
 #   }
 # }
 
-resource "aws_subnet" "ui-subnet" {
-  vpc_id            = aws_vpc.vpc.id
-  availability_zone = format("%sa", var.region)
-  cidr_block        = "192.168.1.96/28"
-  tags = {
-    Name      = format("%s-manual-subnet", var.prefix)
-    Operation = "manual"
-  }
-}
+# resource "aws_subnet" "ui-subnet" {
+#   vpc_id            = aws_vpc.vpc.id
+#   availability_zone = format("%sa", var.region)
+#   cidr_block        = "192.168.1.96/28"
+#   tags = {
+#     Name      = format("%s-manual-subnet", var.prefix)
+#     Operation = "manual"
+#   }
+# }
 
-moved {
-  from = aws_subnet.manual-subnet
-  to   = aws_subnet.ui-subnet
-}
+# moved {
+#   from = aws_subnet.manual-subnet
+#   to   = aws_subnet.ui-subnet
+# }
+
+# removed manually created resource from terraform state using the below command
+# terraform state rm aws_subnet.ui-subnet
