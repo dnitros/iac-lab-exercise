@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "state_bucket" {
-  bucket = "${var.prefix}-tfstate"
+  bucket        = "${var.prefix}-tfstate"
+  force_destroy = true
 
   lifecycle {
     prevent_destroy = true
