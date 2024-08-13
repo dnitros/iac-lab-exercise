@@ -74,4 +74,3 @@ resource "aws_security_group" "lb_sg" {
     Name = format("%s-lb-sg", var.prefix)
   }
 }
-
