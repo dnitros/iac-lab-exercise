@@ -17,3 +17,13 @@ variable "number_of_subnets" {
   type        = number
   description = "Number of subnets to create"
 }
+
+variable "db_username" {
+  type        = string
+  description = "Database username"
+}
+
+variable "db_name" {
+  type        = string
+  description = "Database name"
+}
