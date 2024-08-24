@@ -5,11 +5,66 @@ on: push
 env:
   AWS_REGION: ap-south-1
   IAM_ROLE: arn:aws:iam::160071257600:role/dnitros-iac-lab-github-actions-role
+  WORKING_DIR: session-6_terraform_cloud_and_pipelines
+  VAR_FILE: dev.tfvars
 
 jobs:
-  deploy:
-    name: Deploy
+  init:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.53.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@2ec54502e3e7b5d9591613811da6daded35caa19
+        with:
+          role-session-name: GitHubActionsSession
+          role-to-assume: ${{ env.IAM_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Format check
+        run: terraform -chdir=${{ env.WORKING_DIR }} fmt -recursive -check
+
+      - name: Terraform Init
+        run: terraform -chdir=${{ env.WORKING_DIR }} init
+
+      - name: Init TFLint
+        run: tflint --init
+
+      - name: Run TFLint
+        run: |
+          tflint --chdir=${{ env.WORKING_DIR }} --var-file=${{ env.VAR_FILE }}
+          tflint --chdir=${{ env.WORKING_DIR }}/tf_prerequisites
+
+
+      - name: tfsec scan
+        id: tfsec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          additional_args: --minimum-severity MEDIUM --out tfsec --tfvars-file ${{ env.WORKING_DIR }}/${{ env.VAR_FILE }}
+          format: lovely,markdown
+          working_directory: ${{ env.WORKING_DIR }}
+
+      - name: Summary
+        if: contains(fromJSON('["success", "failure"]'), steps.tfsec.outcome) && always()
+        run: echo "$(cat tfsec.markdown)" >> $GITHUB_STEP_SUMMARY
+
+  plan:
+    runs-on: ubuntu-latest
+    needs: init
     permissions:
       id-token: write
       contents: read
@@ -29,15 +84,39 @@ jobs:
           role-to-assume: ${{ env.IAM_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Get aws identity
-        run: |
-          aws sts get-caller-identity
-
       - name: Terraform Init
-        run: terraform -chdir=session-6_terraform_cloud_and_pipelines init
+        run: terraform -chdir=${{ env.WORKING_DIR }} init
+
+      - name: Terraform Validate
+        run: terraform -chdir=${{ env.WORKING_DIR }} validate
 
       - name: Terraform Plan
-        run: terraform -chdir=session-6_terraform_cloud_and_pipelines plan -var-file=dev.tfvars
+        run: terraform -chdir=${{ env.WORKING_DIR }} plan -var-file=${{ env.VAR_FILE }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: plan
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@2ec54502e3e7b5d9591613811da6daded35caa19
+        with:
+          role-session-name: GitHubActionsSession
+          role-to-assume: ${{ env.IAM_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        run: terraform -chdir=${{ env.WORKING_DIR }} init
 
       - name: Terraform Apply
-        run: terraform -chdir=session-6_terraform_cloud_and_pipelines apply -var-file=dev.tfvars -auto-approve
+        run: terraform -chdir=${{ env.WORKING_DIR }} apply -var-file=${{ env.VAR_FILE }} -auto-approve
