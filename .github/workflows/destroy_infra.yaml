@@ -33,5 +33,5 @@ jobs:
       - name: Terraform Init
         run: terraform -chdir=${{ env.WORKING_DIR }} init
 
-      - name: Terraform Apply
+      - name: Terraform Destroy
         run: terraform -chdir=${{ env.WORKING_DIR }} destroy -var-file=${{ env.VAR_FILE }} -auto-approve
