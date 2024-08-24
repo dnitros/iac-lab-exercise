@@ -9,7 +9,7 @@ run "s3_tests" {
   command = plan
 
   assert {
-    condition = aws_s3_bucket.state_bucket.bucket == format("%s-tfstate", var.prefix)
+    condition     = aws_s3_bucket.state_bucket.bucket == format("%s-tfstate", var.prefix)
     error_message = "S3 bucket name did not match expected"
   }
 }

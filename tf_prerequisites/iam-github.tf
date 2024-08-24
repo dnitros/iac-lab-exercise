@@ -1,6 +1,7 @@
 locals {
   gihub_oidc_already_exists = true
 }
+
 resource "aws_iam_openid_connect_provider" "default" {
   count = local.gihub_oidc_already_exists ? 0 : 1
   url   = "https://token.actions.githubusercontent.com"

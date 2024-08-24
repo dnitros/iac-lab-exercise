@@ -9,7 +9,6 @@ env:
   ECS_CLUSTER: dnitros-iac-lab-ecs-cluster
   ECS_TASK_DEFINITION: dnitros-iac-lab-ecs-task-definition
   IAM_ROLE: arn:aws:iam::160071257600:role/dnitros-iac-lab-github-actions-role
-  WORKING_DIR: session-6_terraform_cloud_and_pipelines
 
 jobs:
   deploy:
@@ -49,7 +48,7 @@ jobs:
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-        working-directory: ./${{ env.WORKING_DIR }}/crud_app/
+        working-directory: ./crud_app/
 
       - name: Install jq
         run: |

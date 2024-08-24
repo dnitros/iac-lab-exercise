@@ -5,7 +5,6 @@ on: workflow_dispatch
 env:
   AWS_REGION: ap-south-1
   IAM_ROLE: arn:aws:iam::160071257600:role/dnitros-iac-lab-github-actions-role
-  WORKING_DIR: session-6_terraform_cloud_and_pipelines
   VAR_FILE: dev.tfvars
 
 jobs:
@@ -31,7 +30,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
-        run: terraform -chdir=${{ env.WORKING_DIR }} init
+        run: terraform init
 
       - name: Terraform Destroy
-        run: terraform -chdir=${{ env.WORKING_DIR }} destroy -var-file=${{ env.VAR_FILE }} -auto-approve
+        run: terraform destroy -var-file=${{ env.VAR_FILE }} -auto-approve

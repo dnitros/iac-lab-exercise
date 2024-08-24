@@ -5,7 +5,6 @@ on: workflow_dispatch
 env:
   AWS_REGION: ap-south-1
   IAM_ROLE: arn:aws:iam::160071257600:role/dnitros-iac-lab-github-actions-role
-  WORKING_DIR: session-6_terraform_cloud_and_pipelines
   VAR_FILE: dev.tfvars
 
 jobs:
@@ -36,26 +35,26 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Format check
-        run: terraform -chdir=${{ env.WORKING_DIR }} fmt -recursive -check
+        run: terraform fmt -recursive -check
 
       - name: Terraform Init
-        run: terraform -chdir=${{ env.WORKING_DIR }} init
+        run: terraform init
 
       - name: Init TFLint
         run: tflint --init
 
       - name: Run TFLint
         run: |
-          tflint --chdir=${{ env.WORKING_DIR }} --var-file=${{ env.VAR_FILE }}
+          tflint --var-file=${{ env.VAR_FILE }}
 
           # if tf_prerequisites directory exists, run tflint on it
           if [ -d "tf_prerequisites" ]; then
-            tflint --chdir=${{ env.WORKING_DIR }}/tf_prerequisites
+            tflint --chdir=tf_prerequisites
           fi
 
           # if backend_support directory exists, run tflint on it
           if [ -d "backend_support" ]; then
-            tflint --chdir=${{ env.WORKING_DIR }}/backend_support
+            tflint --chdir=backend_support
           fi
 
       - name: tfsec scan
@@ -63,9 +62,8 @@ jobs:
         continue-on-error: true
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
-          additional_args: --minimum-severity MEDIUM --out tfsec --tfvars-file ${{ env.WORKING_DIR }}/${{ env.VAR_FILE }}
+          additional_args: --minimum-severity MEDIUM --out tfsec --tfvars-file ${{ env.VAR_FILE }}
           format: lovely,markdown
-          working_directory: ${{ env.WORKING_DIR }}
 
       - name: Summary
         if: contains(fromJSON('["success", "failure"]'), steps.tfsec.outcome) && always()
@@ -94,13 +92,13 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
-        run: terraform -chdir=${{ env.WORKING_DIR }} init
+        run: terraform init
 
       - name: Terraform Validate
-        run: terraform -chdir=${{ env.WORKING_DIR }} validate
+        run: terraform validate
 
       - name: Terraform Plan
-        run: terraform -chdir=${{ env.WORKING_DIR }} plan -var-file=${{ env.VAR_FILE }}
+        run: terraform plan -var-file=${{ env.VAR_FILE }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -125,7 +123,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
-        run: terraform -chdir=${{ env.WORKING_DIR }} init
+        run: terraform init
 
       - name: Terraform Apply
-        run: terraform -chdir=${{ env.WORKING_DIR }} apply -var-file=${{ env.VAR_FILE }} -auto-approve
+        run: terraform apply -var-file=${{ env.VAR_FILE }} -auto-approve
