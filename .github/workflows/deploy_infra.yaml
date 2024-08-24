@@ -1,6 +1,6 @@
 name: Deploy Infra
 
-on: push
+on: workflow_dispatch
 
 env:
   AWS_REGION: ap-south-1
@@ -47,7 +47,16 @@ jobs:
       - name: Run TFLint
         run: |
           tflint --chdir=${{ env.WORKING_DIR }} --var-file=${{ env.VAR_FILE }}
-          tflint --chdir=${{ env.WORKING_DIR }}/tf_prerequisites
+
+          # if tf_prerequisites directory exists, run tflint on it
+          if [ -d "tf_prerequisites" ]; then
+            tflint --chdir=${{ env.WORKING_DIR }}/tf_prerequisites
+          fi
+
+          # if backend_support directory exists, run tflint on it
+          if [ -d "backend_support" ]; then
+            tflint --chdir=${{ env.WORKING_DIR }}/backend_support
+          fi
 
       - name: tfsec scan
         id: tfsec
