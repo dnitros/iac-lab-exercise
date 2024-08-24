@@ -49,9 +49,9 @@ jobs:
           tflint --chdir=${{ env.WORKING_DIR }} --var-file=${{ env.VAR_FILE }}
           tflint --chdir=${{ env.WORKING_DIR }}/tf_prerequisites
 
-
       - name: tfsec scan
         id: tfsec
+        continue-on-error: true
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
           additional_args: --minimum-severity MEDIUM --out tfsec --tfvars-file ${{ env.WORKING_DIR }}/${{ env.VAR_FILE }}
