@@ -28,7 +28,7 @@ jobs:
           tflint_version: v0.53.0
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@2ec54502e3e7b5d9591613811da6daded35caa19
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-session-name: GitHubActionsSession
           role-to-assume: ${{ env.IAM_ROLE }}
@@ -59,11 +59,11 @@ jobs:
 
       - name: tfsec scan
         id: tfsec
-        continue-on-error: true
-        uses: aquasecurity/tfsec-action@v1.0.0
+        uses: aquasecurity/tfsec-action@v1.0.3
         with:
           additional_args: --minimum-severity MEDIUM --out tfsec --tfvars-file ${{ env.VAR_FILE }}
           format: lovely,markdown
+          soft_fail: true
 
       - name: Summary
         if: contains(fromJSON('["success", "failure"]'), steps.tfsec.outcome) && always()
@@ -85,7 +85,7 @@ jobs:
           terraform_version: 1.9.5
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@2ec54502e3e7b5d9591613811da6daded35caa19
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-session-name: GitHubActionsSession
           role-to-assume: ${{ env.IAM_ROLE }}
@@ -116,7 +116,7 @@ jobs:
           terraform_version: 1.9.5
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@2ec54502e3e7b5d9591613811da6daded35caa19
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-session-name: GitHubActionsSession
           role-to-assume: ${{ env.IAM_ROLE }}
